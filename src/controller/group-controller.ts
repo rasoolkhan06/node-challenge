@@ -14,7 +14,6 @@ import { Roll } from "../entity/roll.entity";
 export class GroupController {
   private groupRepository = getRepository(Group);
   private groupStudentRepository = getRepository(GroupStudent);
-  private studentRollRepository = getRepository(StudentRollState);
 
   async allGroups(request: Request, response: Response, next: NextFunction) {
     try {
@@ -156,16 +155,14 @@ export class GroupController {
         const weeksFromNow = new Date(new Date().getTime() - weeksInTime);
 
         console.log(weeksFromNow);
+        console.log(todaysDate);
 
         const studentRolls = await createQueryBuilder()
           .select(["studentRoll.student_id", "roll.name", "roll.completed_at"])
           .from(StudentRollState, "studentRoll")
-          .innerJoin(
-            Roll,
-            "roll",
-            `roll.completed_at BETWEEN ${todaysDate} AND ${weeksFromNow}`
-          )
-          //.where(`roll.completed_at BETWEEN ${todaysDate} AND ${weeksFromNow}`)
+          .innerJoin(Roll, "roll", "studentRoll.roll_id = roll.id")
+          .where("roll.completed_at BETWEEN :weeksFromNow AND :todaysDate",
+                { weeksFromNow: weeksFromNow, todaysDate: todaysDate })
           .execute();
 
         console.log(studentRolls);
