@@ -148,22 +148,20 @@ export class GroupController {
       // 2. For each group, query the student rolls to see which students match the filter for the group
       const groups: Group[] = await this.groupRepository.find();
 
-      const todaysDate = new Date();
-
       groups.map(async (group: Group) => {
+        const todaysDate = new Date();
         const weeksInTime = 1000 * 60 * 60 * 24 * (7 * group.number_of_weeks);
         const weeksFromNow = new Date(new Date().getTime() - weeksInTime);
 
-        console.log(weeksFromNow);
-        console.log(todaysDate);
-
         const studentRolls = await createQueryBuilder()
-          .select(["studentRoll.student_id", "roll.name", "roll.completed_at"])
+          .select(["studentRoll.student_id as student_id", "COUNT(studentRoll.student_id) AS incident_count"])
           .from(StudentRollState, "studentRoll")
           .innerJoin(Roll, "roll", "studentRoll.roll_id = roll.id")
-          .where("roll.completed_at BETWEEN :weeksFromNow AND :todaysDate",
-                { weeksFromNow: weeksFromNow, todaysDate: todaysDate })
-          .execute();
+          .where("roll.completed_at BETWEEN :weeksFromNow AND :todaysDate AND INSTR(:rollStates, studentRoll.state)",
+                { weeksFromNow: weeksFromNow, todaysDate: todaysDate, rollStates: group.roll_states })
+          .groupBy("student_id")
+          .having("incident_count > :incidents", { incidents: group.incidents })
+          .getRawMany();
 
         console.log(studentRolls);
       });
