@@ -49,7 +49,7 @@ export class RollController {
   }
 
   async getRoll(request: Request, response: Response, next: NextFunction) {
-    return this.rollRepository.find({ id: request.params.id });
+    return this.studentRollStateRepository.find({ id: request.params.id });
   }
 
   async addStudentRollStates(
