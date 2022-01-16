@@ -182,10 +182,4 @@ export class GroupController {
       response.status(500).send({ message: err.message });
     }
   }
-
-  async test(request: Request, response: Response, next: NextFunction) {
-    const group = new GroupStudent(1, 1, 3);
-
-    return this.groupStudentRepository.save(group);
-  }
 }

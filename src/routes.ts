@@ -116,12 +116,5 @@ export const Routes = [
     route: "/group/filters",
     controller: GroupController,
     action: "runGroupFilters",
-  },
-  {
-    //to be removed
-    method: "post",
-    route: "/group/test",
-    controller: GroupController,
-    action: "test",
-  },
+  }
 ];
