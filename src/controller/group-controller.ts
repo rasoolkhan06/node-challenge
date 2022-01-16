@@ -148,13 +148,15 @@ export class GroupController {
 
       // 2. For each group, query the student rolls to see which students match the filter for the group
       const groups: Group[] = await this.groupRepository.find();
+      let groupStudents: GroupStudent[] = [];
 
-      groups.map(async (group: Group) => {
+      for (const group of groups) {
         const todaysDate = new Date().toISOString();
         const weeksInTime = 1000 * 60 * 60 * 24 * (7 * group.number_of_weeks);
         const weeksFromNow = new Date(new Date().getTime() - weeksInTime).toISOString();
 
-        const queryResult = await this.studentRollStateRepository
+        const queryResult: { student_id: number, incident_count: number }[] = 
+        await this.studentRollStateRepository
           .createQueryBuilder("studentRoll")
           .select(["studentRoll.student_id as student_id", "COUNT(studentRoll.student_id) AS incident_count"])
           .innerJoin(Roll, "roll", "studentRoll.roll_id = roll.id AND roll.completed_at BETWEEN :weeksFromNow AND :todaysDate", 
@@ -164,10 +166,15 @@ export class GroupController {
           .having("incident_count > :incidents", { incidents: group.incidents })
           .execute();
 
-        console.log(queryResult);
-      });
+        group.run_at = new Date();
+        group.student_count = queryResult.length;
 
-      // 3. Add the list of students that match the filter to the group
+        // 3. Add the list of students that match the filter to the group
+        const groupStudent: GroupStudent[] = queryResult.map((x) => {
+          return new GroupStudent(x.student_id, group.id, x.incident_count);
+        });
+        groupStudents = groupStudents.concat(groupStudent);
+      }
 
       return "Done";
     } catch (err) {
