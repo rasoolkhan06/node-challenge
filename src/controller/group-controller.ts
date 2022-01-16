@@ -18,7 +18,7 @@ export class GroupController {
 
   async allGroups(request: Request, response: Response, next: NextFunction) {
     try {
-      return this.groupRepository.find();
+      return await this.groupRepository.find();
     } catch (err) {
       response.status(500).send({ message: err.message });
     }
@@ -94,6 +94,10 @@ export class GroupController {
   async removeGroup(request: Request, response: Response, next: NextFunction) {
     const groupId: number = request.params.groupId;
 
+    if (!groupId || groupId < 0) {
+      response.status(400).send({ message: "Invalid Request!"});
+    }
+
     try {
       const groupToRemove: Group = await this.groupRepository.findOne(groupId);
 
@@ -116,6 +120,10 @@ export class GroupController {
     // Task 1:
     const groupId: number = request.params.groupId;
 
+    if (!groupId || groupId < 0) {
+      response.status(400).send({ message: "Invalid Request!"});
+    }
+
     try {
       const groupStudents: GroupStudentRO[] = await createQueryBuilder()
         .select([
@@ -126,7 +134,7 @@ export class GroupController {
         ])
         .from(GroupStudent, "groupStudent")
         .innerJoin(Student, "student", "groupStudent.student_id = student.id")
-        .where(`groupStudent.group_id = ${groupId}`)
+        .where("groupStudent.group_id = :id", { id: groupId })
         .getRawMany();
 
       // Return the list of Students that are in a Group
