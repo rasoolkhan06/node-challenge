@@ -14,6 +14,7 @@ import { Roll } from "../entity/roll.entity";
 export class GroupController {
   private groupRepository = getRepository(Group);
   private groupStudentRepository = getRepository(GroupStudent);
+  private studentRollStateRepository = getRepository(StudentRollState);
 
   async allGroups(request: Request, response: Response, next: NextFunction) {
     try {
@@ -149,21 +150,21 @@ export class GroupController {
       const groups: Group[] = await this.groupRepository.find();
 
       groups.map(async (group: Group) => {
-        const todaysDate = new Date();
+        const todaysDate = new Date().toISOString();
         const weeksInTime = 1000 * 60 * 60 * 24 * (7 * group.number_of_weeks);
-        const weeksFromNow = new Date(new Date().getTime() - weeksInTime);
+        const weeksFromNow = new Date(new Date().getTime() - weeksInTime).toISOString();
 
-        const studentRolls = await createQueryBuilder()
+        const queryResult = await this.studentRollStateRepository
+          .createQueryBuilder("studentRoll")
           .select(["studentRoll.student_id as student_id", "COUNT(studentRoll.student_id) AS incident_count"])
-          .from(StudentRollState, "studentRoll")
-          .innerJoin(Roll, "roll", "studentRoll.roll_id = roll.id")
-          .where("roll.completed_at BETWEEN :weeksFromNow AND :todaysDate AND INSTR(:rollStates, studentRoll.state)",
-                { weeksFromNow: weeksFromNow, todaysDate: todaysDate, rollStates: group.roll_states })
+          .innerJoin(Roll, "roll", "studentRoll.roll_id = roll.id AND roll.completed_at BETWEEN :weeksFromNow AND :todaysDate", 
+                { weeksFromNow: weeksFromNow, todaysDate: todaysDate })
+          .where("INSTR(:rollStates, studentRoll.state)", { rollStates: group.roll_states })
           .groupBy("student_id")
           .having("incident_count > :incidents", { incidents: group.incidents })
-          .getRawMany();
+          .execute();
 
-        console.log(studentRolls);
+        console.log(queryResult);
       });
 
       // 3. Add the list of students that match the filter to the group
