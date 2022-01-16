@@ -1,12 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-export enum RollStatesEnum {
-  UNMARK = "unmark",
-  PRESENT = "present",
-  ABSENT = "absent",
-  LATE = "late",
-}
-
 export enum LtmtEnum {
   LESSTHAN = "<",
   MORETHAN = ">",
@@ -23,8 +16,8 @@ export class Group {
   @Column()
   number_of_weeks: number;
 
-  @Column({ type: "varchar" })
-  roll_states: RollStatesEnum;
+  @Column()
+  roll_states: string;
 
   @Column()
   incidents: number;
@@ -43,7 +36,7 @@ export class Group {
   constructor(
     name: string,
     number_of_weeks: number,
-    roll_states: RollStatesEnum,
+    roll_states: string,
     incidents: number,
     ltmt: LtmtEnum
   ) {
@@ -57,7 +50,7 @@ export class Group {
   public prepareToUpdate(
     name?: string,
     number_of_weeks?: number,
-    roll_states?: RollStatesEnum,
+    roll_states?: string,
     incidents?: number,
     ltmt?: LtmtEnum
   ) {

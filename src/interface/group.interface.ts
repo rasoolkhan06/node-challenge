@@ -5,17 +5,19 @@ import {
   IsOptional,
   IsString,
 } from "class-validator";
-import { RollStatesEnum, LtmtEnum } from "../entity/group.entity";
+import { LtmtEnum } from "../entity/group.entity";
 
 export class CreateGroupDto {
   @IsNotEmpty()
+  @IsString()
   name: string;
 
   @IsInt()
   number_of_weeks: number;
 
-  @IsEnum(RollStatesEnum)
-  roll_states: RollStatesEnum;
+  @IsNotEmpty()
+  @IsString()
+  roll_states: string;
 
   @IsInt()
   incidents: number;
@@ -34,8 +36,8 @@ export class UpdateGroupDto {
   number_of_weeks: number;
 
   @IsOptional()
-  @IsEnum(RollStatesEnum)
-  roll_states: RollStatesEnum;
+  @IsString()
+  roll_states: string;
 
   @IsOptional()
   @IsInt()
