@@ -177,9 +177,7 @@ export class GroupController {
       }
 
       await this.groupRepository.save(groups);
-      await this.groupStudentRepository.save(groupStudents);
-
-      return "Done";
+      return this.groupStudentRepository.save(groupStudents);
     } catch (err) {
       response.status(500).send({ message: err.message });
     }
