@@ -176,6 +176,9 @@ export class GroupController {
         groupStudents = groupStudents.concat(groupStudent);
       }
 
+      await this.groupRepository.save(groups);
+      await this.groupStudentRepository.save(groupStudents);
+
       return "Done";
     } catch (err) {
       response.status(500).send({ message: err.message });
