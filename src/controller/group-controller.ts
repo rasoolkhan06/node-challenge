@@ -21,6 +21,7 @@ export class GroupController {
       return await this.groupRepository.find();
     } catch (err) {
       response.status(500).send({ message: err.message });
+      return;
     }
   }
 
@@ -49,6 +50,7 @@ export class GroupController {
       return this.groupRepository.save(group);
     } catch (err) {
       response.status(500).send({ message: err.message });
+      return;
     }
   }
 
@@ -88,6 +90,7 @@ export class GroupController {
       return this.groupRepository.save(group);
     } catch (err) {
       response.status(500).send({ message: err.message });
+      return;
     }
   }
 
@@ -96,6 +99,7 @@ export class GroupController {
 
     if (!groupId || groupId < 0) {
       response.status(400).send({ message: "Invalid Request!"});
+      return;
     }
 
     try {
@@ -109,6 +113,7 @@ export class GroupController {
       return await this.groupRepository.remove(groupToRemove);
     } catch (err) {
       response.status(500).send({ message: err.message });
+      return;
     }
   }
 
@@ -122,6 +127,7 @@ export class GroupController {
 
     if (!groupId || groupId < 0) {
       response.status(400).send({ message: "Invalid Request!"});
+      return;
     }
 
     try {
@@ -141,6 +147,7 @@ export class GroupController {
       return groupStudents;
     } catch (err) {
       response.status(500).json({ message: err.message });
+      return;
     }
   }
 
@@ -185,9 +192,12 @@ export class GroupController {
       }
 
       await this.groupRepository.save(groups);
-      return this.groupStudentRepository.save(groupStudents);
+      await this.groupStudentRepository.save(groupStudents);
+
+      return "Group Filters ran successfully!"
     } catch (err) {
       response.status(500).send({ message: err.message });
+      return;
     }
   }
 }
